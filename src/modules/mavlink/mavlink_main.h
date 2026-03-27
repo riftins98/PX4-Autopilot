@@ -136,7 +136,6 @@ public:
 
 	mavlink_message_t *get_buffer() { return &_mavlink_buffer; }
 	mavlink_status_t *get_status() { return &_mavlink_status; }
-	static Mavlink *get_instance_for_status(const mavlink_status_t *status);
 
 	void setProtocolVersion(uint8_t version);
 	uint8_t getProtocolVersion() const { return _protocol_version; };
@@ -470,7 +469,6 @@ public:
 	bool ftp_enabled() const { return _ftp_on; }
 
 	bool hash_check_enabled() const { return _param_mav_hash_chk_en.get(); }
-	int32_t sign_mode() const { return _param_mav_sign_cfg.get(); }
 	bool forward_heartbeats_enabled() const { return _param_mav_hb_forw_en.get(); }
 
 	bool failure_injection_enabled() const { return _param_sys_failure_injection_enabled.get(); }
@@ -494,7 +492,8 @@ public:
 
 	bool radio_status_critical() const { return _radio_status_critical; }
 
-	bool accept_unsigned(int32_t sign_mode, bool is_usb_uart, uint32_t message_id) { return _sign_control.accept_unsigned(sign_mode, is_usb_uart, message_id); }
+	bool accept_unsigned(uint32_t message_id) { return _sign_control.accept_unsigned(message_id); }
+	void reload_signing_key() { _sign_control.reload_key(); }
 
 
 private:
@@ -641,7 +640,6 @@ private:
 		(ParamBool<px4::params::MAV_USEHILGPS>) _param_mav_usehilgps,
 		(ParamBool<px4::params::MAV_FWDEXTSP>) _param_mav_fwdextsp,
 		(ParamBool<px4::params::MAV_HASH_CHK_EN>) _param_mav_hash_chk_en,
-		(ParamInt<px4::params::MAV_SIGN_CFG>) _param_mav_sign_cfg,
 		(ParamBool<px4::params::MAV_HB_FORW_EN>) _param_mav_hb_forw_en,
 		(ParamInt<px4::params::MAV_RADIO_TOUT>)      _param_mav_radio_timeout,
 		(ParamInt<px4::params::SYS_HITL>) _param_sys_hitl,
