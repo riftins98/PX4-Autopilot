@@ -205,3 +205,11 @@ if param compare -s SENS_EN_ARSPDSIM 1
 then
 	sensor_airspeed_sim start
 fi
+
+# Wait for gz_bridge to advertise simulated sensors, then restart the
+# sensors module so it picks up the correct device IDs and priorities.
+# Without this, EKF2 may never start (0 update events) because the
+# sensors module initialized before sensor_accel was available.
+sleep 2
+sensors stop
+sensors start

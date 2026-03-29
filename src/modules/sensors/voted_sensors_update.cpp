@@ -143,8 +143,21 @@ void VotedSensorsUpdate::imuPoll(struct sensor_combined_s &raw)
 	for (int uorb_index = 0; uorb_index < MAX_SENSOR_COUNT; uorb_index++) {
 		vehicle_imu_s imu_report;
 
-		if ((_accel.priority[uorb_index] > 0) && (_gyro.priority[uorb_index] > 0)
-		    && _vehicle_imu_sub[uorb_index].update(&imu_report)) {
+		if (_vehicle_imu_sub[uorb_index].update(&imu_report)) {
+
+			if ((_accel.priority[uorb_index] <= 0) && (imu_report.accel_device_id != 0)) {
+				const int32_t configured = _accel.priority_configured[uorb_index];
+				_accel.priority[uorb_index] = (configured > 0) ? configured : DEFAULT_PRIORITY;
+			}
+
+			if ((_gyro.priority[uorb_index] <= 0) && (imu_report.gyro_device_id != 0)) {
+				const int32_t configured = _gyro.priority_configured[uorb_index];
+				_gyro.priority[uorb_index] = (configured > 0) ? configured : DEFAULT_PRIORITY;
+			}
+
+			if ((_accel.priority[uorb_index] <= 0) || (_gyro.priority[uorb_index] <= 0)) {
+				continue;
+			}
 
 			// copy corresponding vehicle_imu_status for accel & gyro error counts
 			vehicle_imu_status_s imu_status{};
