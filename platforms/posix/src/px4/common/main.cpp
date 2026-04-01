@@ -82,7 +82,13 @@
 
 #define MODULE_NAME "px4"
 
-static const char *LOCK_FILE_PATH = "/tmp/px4_lock";
+static std::string get_lock_file_base()
+{
+	const char *home = getenv("HOME");
+	std::string dir = std::string(home ? home : "/tmp") + "/.px4/";
+	mkdir(dir.c_str(), 0755);
+	return dir + "px4_lock";
+}
 
 #ifndef PATH_MAX
 #define PATH_MAX 1024
@@ -375,7 +381,7 @@ int main(int argc, char **argv)
 		}
 
 		// delete lock
-		const std::string file_lock_path = std::string(LOCK_FILE_PATH) + '-' + std::to_string(instance);
+		const std::string file_lock_path = get_lock_file_base() + '-' + std::to_string(instance);
 		int fd_flock = open(file_lock_path.c_str(), O_RDWR, 0666);
 
 		if (fd_flock >= 0) {
@@ -639,7 +645,7 @@ void print_usage()
 
 int get_server_running(int instance, bool *is_server_running)
 {
-	const std::string file_lock_path = std::string(LOCK_FILE_PATH) + '-' + std::to_string(instance);
+	const std::string file_lock_path = get_lock_file_base() + '-' + std::to_string(instance);
 	int fd = open(file_lock_path.c_str(), O_RDWR | O_CREAT, 0666);
 
 	if (fd < 0) {
@@ -677,7 +683,7 @@ int get_server_running(int instance, bool *is_server_running)
 
 int set_server_running(int instance)
 {
-	const std::string file_lock_path = std::string(LOCK_FILE_PATH) + '-' + std::to_string(instance);
+	const std::string file_lock_path = get_lock_file_base() + '-' + std::to_string(instance);
 	int fd = open(file_lock_path.c_str(), O_RDWR | O_CREAT, 0666);
 
 	if (fd < 0) {
